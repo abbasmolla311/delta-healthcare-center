@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDoctors } from "@/hooks/useProducts";
+import BookingModal from "@/components/BookingModal";
 import { 
   Search, Video, MessageCircle, Phone, Star, Clock, 
   Calendar, Shield, Award, Heart, Brain, Baby, 
@@ -24,92 +24,26 @@ const specialties = [
   { name: "Ophthalmologist", icon: Eye, doctors: 9, color: "bg-green-100 text-green-600" },
 ];
 
-const doctors = [
-  {
-    id: 1,
-    name: "Dr. Amit Kumar",
-    specialty: "General Physician",
-    qualification: "MBBS, MD",
-    experience: 15,
-    rating: 4.9,
-    reviews: 1234,
-    fee: 500,
-    nextSlot: "Today, 4:00 PM",
-    languages: ["English", "Hindi", "Bengali"],
-    image: "👨‍⚕️",
-  },
-  {
-    id: 2,
-    name: "Dr. Priya Sharma",
-    specialty: "Dermatologist",
-    qualification: "MBBS, MD (Dermatology)",
-    experience: 12,
-    rating: 4.8,
-    reviews: 892,
-    fee: 600,
-    nextSlot: "Today, 5:30 PM",
-    languages: ["English", "Hindi"],
-    image: "👩‍⚕️",
-  },
-  {
-    id: 3,
-    name: "Dr. Arpita Chakraborty",
-    specialty: "Gynecologist",
-    qualification: "MBBS, MS (OBG)",
-    experience: 18,
-    rating: 4.9,
-    reviews: 1567,
-    fee: 700,
-    nextSlot: "Tomorrow, 10:00 AM",
-    languages: ["English", "Bengali"],
-    image: "👩‍⚕️",
-  },
-  {
-    id: 4,
-    name: "Dr. Aritra Batbyal",
-    specialty: "Pediatrician",
-    qualification: "MBBS, MD (Pediatrics)",
-    experience: 10,
-    rating: 4.7,
-    reviews: 678,
-    fee: 500,
-    nextSlot: "Today, 6:00 PM",
-    languages: ["English", "Hindi", "Bengali"],
-    image: "👨‍⚕️",
-  },
-  {
-    id: 5,
-    name: "Dr. D.P. Mandal",
-    specialty: "Cardiologist",
-    qualification: "MBBS, DM (Cardiology)",
-    experience: 22,
-    rating: 4.9,
-    reviews: 2134,
-    fee: 1000,
-    nextSlot: "Tomorrow, 12:00 PM",
-    languages: ["English", "Hindi"],
-    image: "👨‍⚕️",
-  },
-  {
-    id: 6,
-    name: "Dr. Ashish Jha",
-    specialty: "Neurologist",
-    qualification: "MBBS, DM (Neurology)",
-    experience: 16,
-    rating: 4.8,
-    reviews: 945,
-    fee: 900,
-    nextSlot: "Sunday, 6:00 PM",
-    languages: ["English", "Hindi"],
-    image: "👨‍⚕️",
-  },
+// Fallback doctors when database is empty
+const fallbackDoctors = [
+  { id: "1", name: "Dr. Amit Kumar", specialty: "General Physician", qualification: "MBBS, MD", experience_years: 15, rating: 4.9, total_reviews: 1234, consultation_fee: 500, languages: ["English", "Hindi", "Bengali"], profile_image: "👨‍⚕️" },
+  { id: "2", name: "Dr. Priya Sharma", specialty: "Dermatologist", qualification: "MBBS, MD (Dermatology)", experience_years: 12, rating: 4.8, total_reviews: 892, consultation_fee: 600, languages: ["English", "Hindi"], profile_image: "👩‍⚕️" },
+  { id: "3", name: "Dr. Arpita Chakraborty", specialty: "Gynecologist", qualification: "MBBS, MS (OBG)", experience_years: 18, rating: 4.9, total_reviews: 1567, consultation_fee: 700, languages: ["English", "Bengali"], profile_image: "👩‍⚕️" },
+  { id: "4", name: "Dr. Aritra Batbyal", specialty: "Pediatrician", qualification: "MBBS, MD (Pediatrics)", experience_years: 10, rating: 4.7, total_reviews: 678, consultation_fee: 500, languages: ["English", "Hindi", "Bengali"], profile_image: "👨‍⚕️" },
+  { id: "5", name: "Dr. D.P. Mandal", specialty: "Cardiologist", qualification: "MBBS, DM (Cardiology)", experience_years: 22, rating: 4.9, total_reviews: 2134, consultation_fee: 1000, languages: ["English", "Hindi"], profile_image: "👨‍⚕️" },
+  { id: "6", name: "Dr. Ashish Jha", specialty: "Neurologist", qualification: "MBBS, DM (Neurology)", experience_years: 16, rating: 4.8, total_reviews: 945, consultation_fee: 900, languages: ["English", "Hindi"], profile_image: "👨‍⚕️" },
 ];
 
 const Consult = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
+  const [bookingDoctor, setBookingDoctor] = useState<any>(null);
+  
+  const { data: doctors, isLoading } = useDoctors(selectedSpecialty || undefined);
+  
+  const displayDoctors = doctors && doctors.length > 0 ? doctors : fallbackDoctors;
 
-  const filteredDoctors = doctors.filter(doctor => {
+  const filteredDoctors = displayDoctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSpecialty = selectedSpecialty ? doctor.specialty === selectedSpecialty : true;
@@ -211,50 +145,68 @@ const Consult = () => {
                 </Button>
               )}
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDoctors.map((doctor) => (
-                <Card key={doctor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <CardContent className="p-0">
-                    <div className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5">
-                      <div className="flex gap-4">
-                        <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-4xl shadow-md">
-                          {doctor.image}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg">{doctor.name}</h3>
-                          <p className="text-sm text-primary">{doctor.specialty}</p>
-                          <p className="text-xs text-muted-foreground">{doctor.qualification}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">{doctor.rating}</span>
-                            <span className="text-xs text-muted-foreground">({doctor.reviews} reviews)</span>
+            
+            {isLoading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="p-4 bg-muted/30 animate-pulse h-32"></div>
+                      <div className="p-4 space-y-2">
+                        <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+                        <div className="h-3 bg-muted animate-pulse rounded w-1/2"></div>
+                        <div className="h-8 bg-muted animate-pulse rounded mt-4"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredDoctors.map((doctor: any) => (
+                  <Card key={doctor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <CardContent className="p-0">
+                      <div className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5">
+                        <div className="flex gap-4">
+                          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-4xl shadow-md">
+                            {doctor.profile_image || "👨‍⚕️"}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{doctor.name}</h3>
+                            <p className="text-sm text-primary">{doctor.specialty}</p>
+                            <p className="text-xs text-muted-foreground">{doctor.qualification}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm font-medium">{doctor.rating || 4.5}</span>
+                              <span className="text-xs text-muted-foreground">({doctor.total_reviews || 100} reviews)</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center gap-4 mb-4 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Award className="h-4 w-4 text-primary" />
-                          <span>{doctor.experience} years exp.</span>
+                      <div className="p-4">
+                        <div className="flex items-center gap-4 mb-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <Award className="h-4 w-4 text-primary" />
+                            <span>{doctor.experience_years || 5} years exp.</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4 text-secondary" />
+                            <span>Available</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4 text-secondary" />
-                          <span>{doctor.nextSlot}</span>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-2xl font-bold text-primary">₹{doctor.consultation_fee || 500}</span>
+                            <span className="text-sm text-muted-foreground"> / consultation</span>
+                          </div>
+                          <Button onClick={() => setBookingDoctor(doctor)}>Book Now</Button>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-2xl font-bold text-primary">₹{doctor.fee}</span>
-                          <span className="text-sm text-muted-foreground"> / consultation</span>
-                        </div>
-                        <Button>Book Now</Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Features */}
@@ -295,6 +247,13 @@ const Consult = () => {
       </main>
 
       <Footer />
+
+      {/* Booking Modal */}
+      <BookingModal 
+        open={!!bookingDoctor} 
+        onClose={() => setBookingDoctor(null)} 
+        doctor={bookingDoctor}
+      />
     </div>
   );
 };

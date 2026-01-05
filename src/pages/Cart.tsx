@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,42 +10,22 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
   Minus, Plus, Trash2, ShoppingBag, Tag, 
-  Truck, Shield, ArrowRight, Package
+  Truck, Shield, ArrowRight, Package, LogIn
 } from "lucide-react";
-
-interface CartItem {
-  id: number;
-  name: string;
-  brand: string;
-  price: number;
-  mrp: number;
-  quantity: number;
-  image: string;
-  prescription: boolean;
-}
+import { useState } from "react";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    { id: 1, name: "Dolo 650mg", brand: "Micro Labs", price: 30, mrp: 35, quantity: 2, image: "💊", prescription: false },
-    { id: 2, name: "Vitamin D3 60K", brand: "Mankind", price: 180, mrp: 220, quantity: 1, image: "💊", prescription: false },
-    { id: 3, name: "Cetaphil Moisturizer", brand: "Galderma", price: 550, mrp: 650, quantity: 1, image: "🧴", prescription: false },
-  ]);
+  const { user } = useAuth();
+  const { items, loading, updateQuantity, removeFromCart, subtotal } = useCart();
+  const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems(items => 
-      items.map(item => 
-        item.id === id 
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
+  const mrpTotal = items.reduce((sum, item) => sum + item.mrp * item.quantity, 0);
+  const discount = mrpTotal - subtotal;
+  const couponDiscount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
+  const deliveryFee = subtotal >= 500 ? 0 : 40;
+  const total = subtotal - couponDiscount + deliveryFee;
 
   const applyCoupon = () => {
     if (couponCode.toUpperCase() === "SAVE10") {
@@ -52,14 +33,43 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const mrpTotal = cartItems.reduce((sum, item) => sum + item.mrp * item.quantity, 0);
-  const discount = mrpTotal - subtotal;
-  const couponDiscount = appliedCoupon ? Math.round(subtotal * 0.1) : 0;
-  const deliveryFee = subtotal >= 500 ? 0 : 40;
-  const total = subtotal - couponDiscount + deliveryFee;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 py-16 text-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-full flex items-center justify-center">
+              <LogIn className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Please login to view your cart</h1>
+            <p className="text-muted-foreground mb-6">Sign in to add items and checkout</p>
+            <Link to="/auth">
+              <Button>Login / Sign Up</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-  if (cartItems.length === 0) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 py-16 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading your cart...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -86,17 +96,17 @@ const Cart = () => {
       
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-6">Shopping Cart ({cartItems.length} items)</h1>
+          <h1 className="text-2xl font-bold mb-6">Shopping Cart ({items.length} items)</h1>
           
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item) => (
+              {items.map((item) => (
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <div className="flex gap-4">
                       <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-4xl">
-                        {item.image}
+                        {item.image || "💊"}
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between">
@@ -108,7 +118,7 @@ const Cart = () => {
                             )}
                           </div>
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.medicine_id)}
                             className="p-2 text-muted-foreground hover:text-destructive transition-colors"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -117,14 +127,14 @@ const Cart = () => {
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center gap-3">
                             <button
-                              onClick={() => updateQuantity(item.id, -1)}
+                              onClick={() => updateQuantity(item.medicine_id, item.quantity - 1)}
                               className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted"
                             >
                               <Minus className="h-4 w-4" />
                             </button>
                             <span className="font-medium w-8 text-center">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.id, 1)}
+                              onClick={() => updateQuantity(item.medicine_id, item.quantity + 1)}
                               className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-muted"
                             >
                               <Plus className="h-4 w-4" />
@@ -148,7 +158,7 @@ const Cart = () => {
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Enter coupon code"
+                        placeholder="Enter coupon code (Try SAVE10)"
                         className="pl-10"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
@@ -208,7 +218,7 @@ const Cart = () => {
                   <div className="bg-secondary/10 rounded-lg p-3 text-sm text-secondary">
                     You save ₹{discount + couponDiscount} on this order
                   </div>
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => navigate("/checkout")}>
                     Proceed to Checkout
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>

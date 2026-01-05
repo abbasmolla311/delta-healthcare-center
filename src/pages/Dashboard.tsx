@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserOrders, useUserAppointments, useUserLabBookings } from "@/hooks/useProducts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -13,28 +14,17 @@ import {
   Bell, Settings, LogOut, Clock, CheckCircle2, XCircle,
   ShoppingBag, Stethoscope, ArrowRight
 } from "lucide-react";
-
-const mockOrders = [
-  { id: "ORD001", date: "2026-01-03", items: 3, total: 760, status: "delivered" },
-  { id: "ORD002", date: "2026-01-01", items: 2, total: 450, status: "shipped" },
-  { id: "ORD003", date: "2025-12-28", items: 5, total: 1250, status: "processing" },
-];
-
-const mockAppointments = [
-  { id: 1, doctor: "Dr. Amit Kumar", specialty: "General Physician", date: "2026-01-06", time: "4:00 PM", mode: "video", status: "upcoming" },
-  { id: 2, doctor: "Dr. Priya Sharma", specialty: "Dermatologist", date: "2026-01-02", time: "5:30 PM", mode: "chat", status: "completed" },
-];
-
-const mockLabBookings = [
-  { id: 1, test: "Complete Blood Count", date: "2026-01-05", collection: "home", status: "confirmed" },
-  { id: 2, test: "Thyroid Profile", date: "2026-01-02", collection: "lab", status: "completed", reportUrl: "#" },
-];
+import { format } from "date-fns";
 
 const Dashboard = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  
+  const { data: orders = [], isLoading: ordersLoading } = useUserOrders(user?.id);
+  const { data: appointments = [], isLoading: appointmentsLoading } = useUserAppointments(user?.id);
+  const { data: labBookings = [], isLoading: labLoading } = useUserLabBookings(user?.id);
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -56,12 +46,20 @@ const Dashboard = () => {
       case "upcoming":
         return <Badge className="bg-blue-500"><Clock className="h-3 w-3 mr-1" />{status}</Badge>;
       case "processing":
+      case "pending":
         return <Badge className="bg-orange-500"><Clock className="h-3 w-3 mr-1" />{status}</Badge>;
       case "cancelled":
         return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />{status}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
+  };
+
+  const getOrderItems = (items: any) => {
+    if (Array.isArray(items)) {
+      return items.length;
+    }
+    return 0;
   };
 
   return (
@@ -84,10 +82,12 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
+              <Link to="/profile">
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Profile
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
@@ -152,15 +152,26 @@ const Dashboard = () => {
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {mockOrders.slice(0, 2).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div>
-                          <p className="font-medium">{order.id}</p>
-                          <p className="text-xs text-muted-foreground">{order.items} items • ₹{order.total}</p>
-                        </div>
-                        {getStatusBadge(order.status)}
+                    {ordersLoading ? (
+                      <div className="animate-pulse space-y-3">
+                        <div className="h-16 bg-muted rounded-lg"></div>
+                        <div className="h-16 bg-muted rounded-lg"></div>
                       </div>
-                    ))}
+                    ) : orders.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">No orders yet</p>
+                    ) : (
+                      orders.slice(0, 2).map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <p className="font-medium text-sm">{order.id.slice(0, 8)}...</p>
+                            <p className="text-xs text-muted-foreground">
+                              {getOrderItems(order.items)} items • ₹{order.total}
+                            </p>
+                          </div>
+                          {getStatusBadge(order.status || "pending")}
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
 
@@ -173,17 +184,31 @@ const Dashboard = () => {
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {mockAppointments.slice(0, 2).map((apt) => (
-                      <div key={apt.id} className="p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium">{apt.doctor}</p>
-                          {getStatusBadge(apt.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {apt.specialty} • {apt.date} at {apt.time}
-                        </p>
+                    {appointmentsLoading ? (
+                      <div className="animate-pulse space-y-3">
+                        <div className="h-16 bg-muted rounded-lg"></div>
+                        <div className="h-16 bg-muted rounded-lg"></div>
                       </div>
-                    ))}
+                    ) : appointments.length === 0 ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground mb-2">No appointments</p>
+                        <Link to="/consult">
+                          <Button size="sm" variant="outline">Book Now</Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      appointments.slice(0, 2).map((apt: any) => (
+                        <div key={apt.id} className="p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium text-sm">{apt.doctors?.name || "Doctor"}</p>
+                            {getStatusBadge(apt.status || "pending")}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {apt.doctors?.specialty} • {apt.appointment_date} at {apt.appointment_time}
+                          </p>
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
 
@@ -196,23 +221,32 @@ const Dashboard = () => {
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {mockLabBookings.map((booking) => (
-                      <div key={booking.id} className="p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="font-medium text-sm">{booking.test}</p>
-                          {getStatusBadge(booking.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {booking.date} • {booking.collection} collection
-                        </p>
-                        {booking.reportUrl && (
-                          <Button variant="link" size="sm" className="p-0 h-auto mt-1">
-                            <FileText className="h-3 w-3 mr-1" />
-                            Download Report
-                          </Button>
-                        )}
+                    {labLoading ? (
+                      <div className="animate-pulse space-y-3">
+                        <div className="h-16 bg-muted rounded-lg"></div>
                       </div>
-                    ))}
+                    ) : labBookings.length === 0 ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground mb-2">No lab bookings</p>
+                        <Link to="/lab-tests">
+                          <Button size="sm" variant="outline">Book Now</Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      labBookings.slice(0, 2).map((booking: any) => (
+                        <div key={booking.id} className="p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="font-medium text-sm">
+                              {booking.lab_tests?.name || booking.health_packages?.name || "Test"}
+                            </p>
+                            {getStatusBadge(booking.status || "pending")}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {booking.booking_date} • {booking.is_home_collection ? "Home" : "Lab"} collection
+                          </p>
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -224,27 +258,43 @@ const Dashboard = () => {
                   <CardTitle>My Orders</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {mockOrders.map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                            <Package className="h-6 w-6 text-muted-foreground" />
+                  {ordersLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-20 bg-muted rounded-lg"></div>
+                      ))}
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-4">No orders yet</p>
+                      <Link to="/shop">
+                        <Button>Shop Now</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders.map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                              <Package className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-semibold">Order #{order.id.slice(0, 8)}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {getOrderItems(order.items)} items • {format(new Date(order.created_at), "PP")}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold">{order.id}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {order.items} items • {order.date}
-                            </p>
+                          <div className="text-right">
+                            <p className="font-bold">₹{order.total}</p>
+                            {getStatusBadge(order.status || "pending")}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold">₹{order.total}</p>
-                          {getStatusBadge(order.status)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -255,28 +305,44 @@ const Dashboard = () => {
                   <CardTitle>My Appointments</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {mockAppointments.map((apt) => (
-                      <div key={apt.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Stethoscope className="h-6 w-6 text-primary" />
+                  {appointmentsLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-20 bg-muted rounded-lg"></div>
+                      ))}
+                    </div>
+                  ) : appointments.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-4">No appointments scheduled</p>
+                      <Link to="/consult">
+                        <Button>Book Consultation</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {appointments.map((apt: any) => (
+                        <div key={apt.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                              <Stethoscope className="h-6 w-6 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-semibold">{apt.doctors?.name || "Doctor"}</p>
+                              <p className="text-sm text-muted-foreground">{apt.doctors?.specialty}</p>
+                              <p className="text-sm">{apt.appointment_date} at {apt.appointment_time} • {apt.consultation_mode}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold">{apt.doctor}</p>
-                            <p className="text-sm text-muted-foreground">{apt.specialty}</p>
-                            <p className="text-sm">{apt.date} at {apt.time} • {apt.mode}</p>
+                          <div className="text-right">
+                            {getStatusBadge(apt.status || "pending")}
+                            {apt.status === "confirmed" && (
+                              <Button size="sm" className="mt-2">Join</Button>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          {getStatusBadge(apt.status)}
-                          {apt.status === "upcoming" && (
-                            <Button size="sm" className="mt-2">Join</Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -287,32 +353,50 @@ const Dashboard = () => {
                   <CardTitle>My Lab Tests</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {mockLabBookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
-                            <TestTube className="h-6 w-6 text-secondary" />
+                  {labLoading ? (
+                    <div className="animate-pulse space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-20 bg-muted rounded-lg"></div>
+                      ))}
+                    </div>
+                  ) : labBookings.length === 0 ? (
+                    <div className="text-center py-12">
+                      <TestTube className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-4">No lab tests booked</p>
+                      <Link to="/lab-tests">
+                        <Button>Book Lab Test</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {labBookings.map((booking: any) => (
+                        <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
+                              <TestTube className="h-6 w-6 text-secondary" />
+                            </div>
+                            <div>
+                              <p className="font-semibold">
+                                {booking.lab_tests?.name || booking.health_packages?.name || "Test"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {booking.booking_date} • {booking.is_home_collection ? "Home" : "Lab"} collection
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold">{booking.test}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {booking.date} • {booking.collection} collection
-                            </p>
+                          <div className="text-right">
+                            {getStatusBadge(booking.status || "pending")}
+                            {booking.report_url && (
+                              <Button variant="outline" size="sm" className="mt-2">
+                                <FileText className="h-4 w-4 mr-1" />
+                                Report
+                              </Button>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          {getStatusBadge(booking.status)}
-                          {booking.reportUrl && (
-                            <Button variant="outline" size="sm" className="mt-2">
-                              <FileText className="h-4 w-4 mr-1" />
-                              Report
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -325,8 +409,10 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">No prescriptions uploaded yet</p>
-                    <Button className="mt-4">Upload Prescription</Button>
+                    <p className="text-muted-foreground mb-4">Manage your prescriptions here</p>
+                    <Link to="/upload-prescription">
+                      <Button>Upload Prescription</Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
