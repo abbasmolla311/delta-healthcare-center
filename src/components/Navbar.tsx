@@ -23,7 +23,8 @@ const Navbar = () => {
     { name: "Shop", path: "/shop" },
     { name: "Doctors", path: "/doctors" },
     { name: "Lab Tests", path: "/lab-tests" },
-    { name: "Services", path: "/services" },
+    { name: "Scans", path: "/scan-booking" },
+    { name: "Contact", path: "/contact" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -85,10 +86,10 @@ const Navbar = () => {
               {user && <NotificationDropdown />}
               
               {user ? (
-                <Link to="/dashboard">
+                <Link to="/profile">
                   <Button variant="outline" size="sm" className="gap-2">
                     <User className="h-4 w-4" />
-                    Dashboard
+                    My Account
                   </Button>
                 </Link>
               ) : (

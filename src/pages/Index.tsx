@@ -1,21 +1,44 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import HeroSection from "@/components/HeroSection";
-import ServicesOverview from "@/components/ServicesOverview";
-import FeaturedDoctors from "@/components/FeaturedDoctors";
+import HeroCarousel from "@/components/home/HeroCarousel";
+import QuickActions from "@/components/home/QuickActions";
+import CategorySection from "@/components/home/CategorySection";
+import DoctorSchedule from "@/components/home/DoctorSchedule";
+import HealthPackages from "@/components/home/HealthPackages";
+import DiscountedProducts from "@/components/home/DiscountedProducts";
+import AboutSection from "@/components/home/AboutSection";
 import Testimonials from "@/components/Testimonials";
-import CTASection from "@/components/CTASection";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
-        <HeroSection />
-        <ServicesOverview />
-        <FeaturedDoctors />
-        <Testimonials />
-        <CTASection />
+      <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4 space-y-12">
+          {/* Hero Carousel */}
+          <HeroCarousel />
+          
+          {/* Quick Actions */}
+          <QuickActions />
+          
+          {/* Discounted Products */}
+          <DiscountedProducts />
+          
+          {/* All Categories */}
+          <CategorySection />
+          
+          {/* Health Packages */}
+          <HealthPackages />
+          
+          {/* Visiting Doctors Schedule */}
+          <DoctorSchedule />
+          
+          {/* About Section */}
+          <AboutSection />
+          
+          {/* Testimonials */}
+          <Testimonials />
+        </div>
       </main>
       <Footer />
     </div>
