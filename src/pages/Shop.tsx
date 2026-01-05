@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useProducts } from "@/hooks/useProducts";
+import { useCart } from "@/contexts/CartContext";
 import { 
   Search, Filter, ShoppingCart, Heart, Star, 
   Pill, Droplets, Stethoscope, Baby, Leaf, 
   Dumbbell, ThermometerSun, Sparkles, HeartPulse
 } from "lucide-react";
+import { toast } from "sonner";
 
 const categories = [
   { name: "Medicines", icon: Pill, count: 500, slug: "medicines", color: "bg-blue-100 text-blue-600" },
@@ -23,25 +26,38 @@ const categories = [
   { name: "Medical Devices", icon: ThermometerSun, count: 60, slug: "medical-devices", color: "bg-red-100 text-red-600" },
 ];
 
-const featuredProducts = [
-  { id: 1, name: "Dolo 650mg", brand: "Micro Labs", price: 30, mrp: 35, discount: 14, rating: 4.5, reviews: 234, image: "💊", prescription: false },
-  { id: 2, name: "Crocin Advance", brand: "GSK", price: 25, mrp: 28, discount: 11, rating: 4.3, reviews: 156, image: "💊", prescription: false },
-  { id: 3, name: "Vitamin D3 60K", brand: "Mankind", price: 180, mrp: 220, discount: 18, rating: 4.7, reviews: 89, image: "💊", prescription: false },
-  { id: 4, name: "Cetaphil Moisturizer", brand: "Galderma", price: 550, mrp: 650, discount: 15, rating: 4.6, reviews: 312, image: "🧴", prescription: false },
-  { id: 5, name: "Himalaya Neem Face Wash", brand: "Himalaya", price: 150, mrp: 175, discount: 14, rating: 4.4, reviews: 567, image: "🧴", prescription: false },
-  { id: 6, name: "Ensure Powder 400g", brand: "Abbott", price: 750, mrp: 850, discount: 12, rating: 4.8, reviews: 203, image: "🥛", prescription: false },
-  { id: 7, name: "Omez 20mg", brand: "Dr. Reddy's", price: 95, mrp: 110, discount: 14, rating: 4.5, reviews: 178, image: "💊", prescription: true },
-  { id: 8, name: "BP Monitor Digital", brand: "Omron", price: 1850, mrp: 2200, discount: 16, rating: 4.7, reviews: 445, image: "🩺", prescription: false },
+// Fallback products when database is empty
+const fallbackProducts = [
+  { id: "1", name: "Dolo 650mg", brand: "Micro Labs", price: 30, discount_percent: 14, image_url: "💊", requires_prescription: false },
+  { id: "2", name: "Crocin Advance", brand: "GSK", price: 25, discount_percent: 11, image_url: "💊", requires_prescription: false },
+  { id: "3", name: "Vitamin D3 60K", brand: "Mankind", price: 180, discount_percent: 18, image_url: "💊", requires_prescription: false },
+  { id: "4", name: "Cetaphil Moisturizer", brand: "Galderma", price: 550, discount_percent: 15, image_url: "🧴", requires_prescription: false },
+  { id: "5", name: "Himalaya Neem Face Wash", brand: "Himalaya", price: 150, discount_percent: 14, image_url: "🧴", requires_prescription: false },
+  { id: "6", name: "Ensure Powder 400g", brand: "Abbott", price: 750, discount_percent: 12, image_url: "🥛", requires_prescription: false },
+  { id: "7", name: "Omez 20mg", brand: "Dr. Reddy's", price: 95, discount_percent: 14, image_url: "💊", requires_prescription: true },
+  { id: "8", name: "BP Monitor Digital", brand: "Omron", price: 1850, discount_percent: 16, image_url: "🩺", requires_prescription: false },
 ];
 
 const Shop = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { addToCart } = useCart();
+  const { data: products, isLoading } = useProducts(searchQuery, selectedCategory || undefined);
 
-  const filteredProducts = featuredProducts.filter(product => 
+  const displayProducts = products && products.length > 0 ? products : fallbackProducts;
+
+  const filteredProducts = displayProducts.filter(product => 
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchQuery.toLowerCase())
+    (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const handleAddToCart = (product: any) => {
+    addToCart(product);
+  };
+
+  const getMrp = (price: number, discountPercent: number) => {
+    return Math.round(price / (1 - discountPercent / 100));
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,45 +170,78 @@ const Shop = () => {
           <section>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Featured Products</h2>
-              <Button variant="outline">View All</Button>
+              {selectedCategory && (
+                <Button variant="outline" onClick={() => setSelectedCategory(null)}>
+                  Clear Filter
+                </Button>
+              )}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="group overflow-hidden hover:shadow-lg transition-all">
-                  <CardContent className="p-0">
-                    <div className="relative p-4 bg-muted/30">
-                      <div className="text-5xl text-center py-4">{product.image}</div>
-                      {product.prescription && (
-                        <Badge className="absolute top-2 left-2 bg-orange-500">Rx</Badge>
-                      )}
-                      <Badge className="absolute top-2 right-2 bg-secondary">
-                        {product.discount}% OFF
-                      </Badge>
-                      <button className="absolute bottom-2 right-2 p-2 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500" />
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <p className="text-xs text-muted-foreground mb-1">{product.brand}</p>
-                      <h3 className="font-semibold text-sm mb-2 line-clamp-2">{product.name}</h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs font-medium">{product.rating}</span>
-                        <span className="text-xs text-muted-foreground">({product.reviews})</span>
+            
+            {isLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="p-4 bg-muted/30 animate-pulse h-32"></div>
+                      <div className="p-4 space-y-2">
+                        <div className="h-3 bg-muted animate-pulse rounded"></div>
+                        <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+                        <div className="h-6 bg-muted animate-pulse rounded w-1/2"></div>
                       </div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="font-bold text-lg">₹{product.price}</span>
-                        <span className="text-sm text-muted-foreground line-through">₹{product.mrp}</span>
-                      </div>
-                      <Button size="sm" className="w-full gap-2">
-                        <ShoppingCart className="h-4 w-4" />
-                        Add to Cart
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredProducts.map((product) => {
+                  const mrp = getMrp(product.price, product.discount_percent || 0);
+                  return (
+                    <Card key={product.id} className="group overflow-hidden hover:shadow-lg transition-all">
+                      <CardContent className="p-0">
+                        <div className="relative p-4 bg-muted/30">
+                          <div className="text-5xl text-center py-4">{product.image_url || "💊"}</div>
+                          {product.requires_prescription && (
+                            <Badge className="absolute top-2 left-2 bg-orange-500">Rx</Badge>
+                          )}
+                          {product.discount_percent && product.discount_percent > 0 && (
+                            <Badge className="absolute top-2 right-2 bg-secondary">
+                              {product.discount_percent}% OFF
+                            </Badge>
+                          )}
+                          <button className="absolute bottom-2 right-2 p-2 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Heart className="h-4 w-4 text-muted-foreground hover:text-red-500" />
+                          </button>
+                        </div>
+                        <div className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">{product.brand || "Generic"}</p>
+                          <h3 className="font-semibold text-sm mb-2 line-clamp-2">{product.name}</h3>
+                          <div className="flex items-center gap-1 mb-2">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-medium">4.5</span>
+                            <span className="text-xs text-muted-foreground">(100+)</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="font-bold text-lg">₹{product.price}</span>
+                            {mrp > product.price && (
+                              <span className="text-sm text-muted-foreground line-through">₹{mrp}</span>
+                            )}
+                          </div>
+                          <Button 
+                            size="sm" 
+                            className="w-full gap-2"
+                            onClick={() => handleAddToCart(product)}
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Add to Cart
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
       </main>
