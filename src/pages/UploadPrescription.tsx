@@ -56,7 +56,7 @@ const UploadPrescription = () => {
 
     setUploading(true);
     try {
-      // Upload file to storage
+      // Upload file to storage with user ID folder for RLS
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
@@ -66,17 +66,13 @@ const UploadPrescription = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("prescriptions")
-        .getPublicUrl(fileName);
-
-      // Save prescription record
+      // Store the file path (not public URL) for security
+      // We'll generate signed URLs when viewing prescriptions
       const { error: dbError } = await supabase
         .from("prescriptions")
         .insert({
           user_id: user.id,
-          image_url: urlData.publicUrl,
+          image_url: fileName, // Store path, not public URL
           notes: notes || null,
           status: "pending",
         });
