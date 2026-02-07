@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserOrders, useUserAppointments, useUserLabBookings } from "@/hooks/useProducts";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import OrderTracking from "@/components/OrderTracking";
@@ -19,18 +20,50 @@ import {
 import { 
   User, Package, Calendar, TestTube, Scan, FileText, 
   Bell, Settings, LogOut, Clock, CheckCircle2, XCircle,
-  ShoppingBag, Stethoscope, ArrowRight, Eye
+  ShoppingBag, Stethoscope, ArrowRight, Eye, Download, Loader2
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
   
   const { data: orders = [], isLoading: ordersLoading } = useUserOrders(user?.id);
   const { data: appointments = [], isLoading: appointmentsLoading } = useUserAppointments(user?.id);
   const { data: labBookings = [], isLoading: labLoading } = useUserLabBookings(user?.id);
+
+  const handleDownloadInvoice = async (type: "order" | "lab_booking", referenceId: string) => {
+    setDownloadingInvoice(referenceId);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-invoice", {
+        body: { type, referenceId },
+      });
+
+      if (error) throw error;
+
+      // Create a Blob and download
+      const blob = new Blob([data.html], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Open in new window for printing/saving
+      const printWindow = window.open(url, "_blank");
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+      
+      toast.success(`Invoice ${data.invoiceNumber} generated!`);
+    } catch (error: any) {
+      console.error("Invoice error:", error);
+      toast.error("Failed to generate invoice");
+    } finally {
+      setDownloadingInvoice(null);
+    }
+  };
 
   if (authLoading) {
     return (
@@ -295,7 +328,7 @@ const Dashboard = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
                             <div className="text-right">
                               <p className="font-bold">₹{order.total}</p>
                               {getStatusBadge(order.status || "pending")}
@@ -304,6 +337,20 @@ const Dashboard = () => {
                               <Eye className="h-4 w-4 mr-1" />
                               Track
                             </Button>
+                            {(order.status === "delivered" || order.payment_status === "completed") && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDownloadInvoice("order", order.id)}
+                                disabled={downloadingInvoice === order.id}
+                              >
+                                {downloadingInvoice === order.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -398,14 +445,30 @@ const Dashboard = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex flex-col items-end gap-2">
                             {getStatusBadge(booking.status || "pending")}
-                            {booking.report_url && (
-                              <Button variant="outline" size="sm" className="mt-2">
-                                <FileText className="h-4 w-4 mr-1" />
-                                Report
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {booking.report_url && (
+                                <Button variant="outline" size="sm">
+                                  <FileText className="h-4 w-4 mr-1" />
+                                  Report
+                                </Button>
+                              )}
+                              {(booking.status === "completed" || booking.payment_status === "completed") && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDownloadInvoice("lab_booking", booking.id)}
+                                  disabled={downloadingInvoice === booking.id}
+                                >
+                                  {downloadingInvoice === booking.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Download className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
