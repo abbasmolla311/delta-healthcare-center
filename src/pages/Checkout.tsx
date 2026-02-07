@@ -120,6 +120,34 @@ const Checkout = () => {
 
       // COD - clear cart and redirect
       await clearCart();
+      
+      // Send notifications
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, phone, email")
+          .eq("id", user.id)
+          .single();
+        
+        await supabase.functions.invoke("send-notification", {
+          body: {
+            type: "order_placed",
+            userId: user.id,
+            email: profile?.email || user.email,
+            phone: profile?.phone || formData.phone,
+            data: {
+              orderId: order.id,
+              orderTotal: total,
+              customerName: profile?.full_name || "Customer",
+            },
+            channels: ["email", "sms"],
+          },
+        });
+      } catch (notifError) {
+        console.error("Notification error:", notifError);
+        // Don't block order completion
+      }
+      
       toast.success("Order placed successfully!");
       navigate("/dashboard");
     } catch (error: any) {

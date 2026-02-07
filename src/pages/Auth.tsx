@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, Phone, Building, Store } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Building, Store, ArrowLeft } from "lucide-react";
 import logo from "@/assets/logo.jpeg";
 
 const loginSchema = z.object({
@@ -25,11 +25,17 @@ const signupSchema = z.object({
   accountType: z.enum(["customer", "wholesale"]),
 });
 
+const resetSchema = z.object({
+  email: z.string().trim().email("Invalid email address"),
+});
+
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   
   const defaultTab = location.state?.tab || "login";
   const defaultAccountType = location.state?.accountType || "customer";
@@ -150,6 +156,94 @@ const Auth = () => {
     setIsLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const result = resetSchema.safeParse({ email: resetEmail });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) fieldErrors[err.path[0].toString()] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password reset email sent! Check your inbox.");
+      setShowForgotPassword(false);
+      setResetEmail("");
+    }
+    setIsLoading(false);
+  };
+
+  // Handle password reset from email link
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("reset") === "true") {
+      toast.info("You can now set a new password in your account settings.");
+    }
+  }, [location.search]);
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center">
+              <img src={logo} alt="Taj Medical Store" className="h-20 w-20 rounded-full object-cover shadow-lg" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-primary">Reset Password</CardTitle>
+              <CardDescription>Enter your email to receive a password reset link</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    className="pl-10"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                  />
+                </div>
+                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Sending..." : "Send Reset Link"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Login
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
@@ -213,6 +307,14 @@ const Auth = () => {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Login"}
                 </Button>
+
+                <button
+                  type="button"
+                  className="w-full text-sm text-primary hover:underline"
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  Forgot your password?
+                </button>
               </form>
             </TabsContent>
 
