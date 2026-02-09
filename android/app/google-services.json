@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "892494691806",
+    "project_id": "tajmedicalapp",
+    "storage_bucket": "tajmedicalapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892494691806:android:9115e7c5a6fdeb4ca9b14f",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZYkhMtEwnYA8IPqeM6pchdU_H3_oQuP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892494691806:android:91c4510b9299b907a9b14f",
+        "android_client_info": {
+          "package_name": "com.taj.store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZYkhMtEwnYA8IPqeM6pchdU_H3_oQuP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892494691806:android:9fdd103615aa5a08a9b14f",
+        "android_client_info": {
+          "package_name": "com.tajmedicalapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZYkhMtEwnYA8IPqeM6pchdU_H3_oQuP4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
