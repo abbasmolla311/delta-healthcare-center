@@ -8,12 +8,26 @@ import {
   LucideIcon
 } from "lucide-react";
 
-// Interfaces remain the same
-export interface SubCategory { name: string; slug: string; }
-export interface Category { name: string; slug: string; icon: LucideIcon; color: string; subcategories: SubCategory[]; }
-export interface CategoryGroup { name: string; slug: string; icon: LucideIcon; categories: Category[]; }
+export interface SubCategory {
+  name: string;
+  slug: string;
+}
 
-// New, detailed category structure
+export interface Category {
+  name: string;
+  slug: string;
+  icon: LucideIcon;
+  color: string;
+  subcategories: SubCategory[];
+}
+
+export interface CategoryGroup {
+  name: string;
+  slug: string;
+  icon: LucideIcon;
+  categories: Category[];
+}
+
 export const categoryGroups: CategoryGroup[] = [
   {
     name: "General Store",
@@ -115,11 +129,72 @@ export const categoryGroups: CategoryGroup[] = [
       { name: "Diabetic Nutrition", slug: "diabetic-nutrition", icon: Apple, color: "bg-green-500", subcategories: [] },
       { name: "Diabetic Aids", slug: "diabetic-aids", icon: Syringe, color: "bg-purple-500", subcategories: [] },
     ]
-  }
+  },
+  {
+    name: "Ayurvedic",
+    slug: "ayurvedic",
+    icon: Leaf,
+    categories: [
+      { name: "Ayurvedic Foods", slug: "ayurvedic-foods", icon: Leaf, color: "bg-green-600", subcategories: [] },
+      { name: "Ayurvedic Personal Care", slug: "ayurvedic-personal-care", icon: Heart, color: "bg-emerald-500", subcategories: [] },
+      { name: "Ayurvedic Remedies", slug: "ayurvedic-remedies", icon: FlaskConical, color: "bg-lime-600", subcategories: [] },
+      { name: "Herbal Supplements", slug: "herbal-supplements", icon: Leaf, color: "bg-teal-500", subcategories: [] },
+      { name: "Immunity Boosters", slug: "immunity-boosters", icon: ShieldCheck, color: "bg-green-500", subcategories: [] },
+    ]
+  },
 ];
 
-// Exporting other category arrays for potential use elsewhere, though categoryGroups is primary
-export const pharmacyCategories = [];
-export const diagnosticCategories = [];
-export const radiologyCategories = [];
-export const doctorSpecialties = [];
+export const pharmacyCategories = [
+  { name: "Antibiotics & Antivirals", slug: "antibiotics", icon: ShieldCheck, color: "bg-red-600" },
+  { name: "Gastrointestinal", slug: "gastrointestinal", icon: Activity, color: "bg-amber-500" },
+  { name: "Cardiovascular", slug: "cardiovascular", icon: HeartPulse, color: "bg-red-500" },
+  { name: "Respiratory", slug: "respiratory", icon: Wind, color: "bg-sky-500" },
+  { name: "Central Nervous System", slug: "cns", icon: Brain, color: "bg-purple-500" },
+  { name: "Musculo-Skeletal", slug: "musculo-skeletal", icon: Bone, color: "bg-orange-500" },
+  { name: "Hormones", slug: "hormones", icon: Activity, color: "bg-pink-500" },
+  { name: "Infectious Disease", slug: "infectious-disease", icon: ShieldCheck, color: "bg-green-500" },
+  { name: "Oncology", slug: "oncology", icon: Microscope, color: "bg-blue-600" },
+  { name: "Vitamins & Minerals", slug: "vitamins-minerals", icon: FlaskConical, color: "bg-yellow-500" },
+  { name: "Dermatologicals", slug: "dermatologicals", icon: Sparkles, color: "bg-rose-500" },
+  { name: "Allergy & Immune", slug: "allergy-immune", icon: ShieldCheck, color: "bg-indigo-500" },
+  { name: "Eye Care", slug: "eye-care", icon: Eye, color: "bg-cyan-500" },
+];
+
+export const diagnosticCategories = [
+  { name: "Diabetes", slug: "diabetes", icon: Syringe, color: "bg-blue-500" },
+  { name: "Heart", slug: "heart", icon: HeartPulse, color: "bg-red-500" },
+  { name: "Kidney", slug: "kidney", icon: Activity, color: "bg-orange-500" },
+  { name: "Liver", slug: "liver", icon: Activity, color: "bg-amber-600" },
+  { name: "Thyroid", slug: "thyroid", icon: Activity, color: "bg-purple-500" },
+  { name: "Vitamins", slug: "vitamins", icon: FlaskConical, color: "bg-yellow-500" },
+  { name: "Bone", slug: "bone", icon: Bone, color: "bg-gray-500" },
+  { name: "Fever", slug: "fever", icon: Thermometer, color: "bg-red-400" },
+  { name: "Immunity", slug: "immunity", icon: ShieldCheck, color: "bg-green-500" },
+  { name: "Anaemia", slug: "anaemia", icon: Droplets, color: "bg-rose-500" },
+  { name: "Allergy", slug: "allergy", icon: Wind, color: "bg-sky-400" },
+  { name: "Pregnancy", slug: "pregnancy", icon: Baby, color: "bg-pink-500" },
+];
+
+export const radiologyCategories = [
+  { name: "X-Ray", slug: "x-ray", icon: Scan, color: "bg-gray-600" },
+  { name: "MRI", slug: "mri", icon: Scan, color: "bg-blue-600" },
+  { name: "CT Scan", slug: "ct-scan", icon: Scan, color: "bg-purple-600" },
+  { name: "Ultrasound", slug: "ultrasound", icon: Scan, color: "bg-cyan-500" },
+  { name: "Mammography", slug: "mammography", icon: Scan, color: "bg-pink-500" },
+  { name: "ECG", slug: "ecg", icon: HeartPulse, color: "bg-red-500" },
+  { name: "2D Echo", slug: "2d-echo", icon: HeartPulse, color: "bg-rose-500" },
+  { name: "TMT", slug: "tmt", icon: Activity, color: "bg-orange-500" },
+];
+
+export const doctorSpecialties = [
+  { name: "General Medicine", slug: "general-medicine", icon: Stethoscope, color: "bg-blue-500" },
+  { name: "Paediatrics", slug: "paediatrics", icon: Baby, color: "bg-pink-500" },
+  { name: "Gynaecology", slug: "gynaecology", icon: Heart, color: "bg-rose-500" },
+  { name: "Diabetology", slug: "diabetology", icon: Syringe, color: "bg-orange-500" },
+  { name: "Cardiology", slug: "cardiology", icon: HeartPulse, color: "bg-red-500" },
+  { name: "Orthopaedics", slug: "orthopaedics", icon: Bone, color: "bg-amber-600" },
+  { name: "Dermatology", slug: "dermatology", icon: Sparkles, color: "bg-purple-500" },
+  { name: "Pulmonology", slug: "pulmonology", icon: Wind, color: "bg-sky-500" },
+  { name: "ENT", slug: "ent", icon: Ear, color: "bg-teal-500" },
+  { name: "Neurology", slug: "neurology", icon: Brain, color: "bg-indigo-500" },
+];
