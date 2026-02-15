@@ -15,14 +15,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Start with loading as true
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Error getting session:", error);
+      } finally {
+        setLoading(false); // Set loading to false only after the check is complete
+      }
     };
 
     getSession();
@@ -30,7 +35,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -44,9 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = { user, session, loading, signOut };
 
+  // CRITICAL FIX: Do not render children until the initial loading is false.
+  // This prevents the UI from rendering before it knows if a user is logged in.
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? null : children}
     </AuthContext.Provider>
   );
 };

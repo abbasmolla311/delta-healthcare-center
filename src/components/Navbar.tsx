@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, Search, ShoppingCart, User, ChevronDown, Grid } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Phone, MessageCircle, Search, ShoppingCart, User, ChevronDown, Grid, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchModal from "@/components/SearchModal";
 import NotificationDropdown from "@/components/NotificationDropdown";
@@ -18,7 +18,8 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const { itemCount } = useCart();
   const { isAdmin, isWholesale } = useUserRole();
 
@@ -36,13 +37,19 @@ const Navbar = () => {
   const getDashboardLink = () => {
     if (isAdmin) return "/admin";
     if (isWholesale) return "/wholesale";
-    return "/profile";
+    return "/dashboard";
   };
 
   const getDashboardLabel = () => {
     if (isAdmin) return "Admin Panel";
     if (isWholesale) return "Business Dashboard";
-    return "My Account";
+    return "Dashboard";
+  };
+
+  const handleLogout = () => {
+    signOut();
+    setIsOpen(false);
+    navigate("/");
   };
 
   return (
@@ -153,30 +160,42 @@ const Navbar = () => {
                     {link.name}
                   </Link>
                 ))}
-                <div className="px-4 pt-4 mt-2 border-t border-border">
-                    {user ? (
-                        <Link to={getDashboardLink()} onClick={() => setIsOpen(false)}>
+                <div className="px-4 pt-4 mt-2 border-t border-border space-y-3">
+                  {user ? (
+                    <>
+                      <Link to={getDashboardLink()} onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full gap-2">
-                            <User className="h-4 w-4" />
-                            {getDashboardLabel()}
+                          <LayoutDashboard className="h-4 w-4" />
+                          {getDashboardLabel()}
                         </Button>
-                        </Link>
-                    ) : (
-                        <Link to="/auth" onClick={() => setIsOpen(false)}>
+                      </Link>
+                      <Link to="/profile" onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full gap-2">
-                            <User className="h-4 w-4" />
-                            Login / Register
+                          <User className="h-4 w-4" />
+                          My Profile
                         </Button>
-                        </Link>
-                    )}
+                      </Link>
+                      <Button variant="destructive" className="w-full gap-2" onClick={handleLogout}>
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full gap-2">
+                        <User className="h-4 w-4" />
+                        Login / Register
+                      </Button>
+                    </Link>
+                  )}
                 </div>
                 <div className="px-4 pt-4 flex gap-2">
-                    <a href="tel:+917427915869" className="flex-1">
-                      <Button variant="outline" className="w-full gap-2"><Phone className="h-4 w-4" />Call</Button>
-                    </a>
-                    <a href="https://wa.me/917427915869?text=Hello" target="_blank" rel="noopener noreferrer" className="flex-1">
-                      <Button className="w-full gap-2 bg-green-500 hover:bg-green-600 text-white"><MessageCircle className="h-4 w-4" />WhatsApp</Button>
-                    </a>
+                  <a href="tel:+917427915869" className="flex-1">
+                    <Button variant="outline" className="w-full gap-2"><Phone className="h-4 w-4" />Call</Button>
+                  </a>
+                  <a href="https://wa.me/917427915869?text=Hello" target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <Button className="w-full gap-2 bg-green-500 hover:bg-green-600 text-white"><MessageCircle className="h-4 w-4" />WhatsApp</Button>
+                  </a>
                 </div>
               </div>
             </div>
