@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface AuthContextType {
   user: User | null;
@@ -48,11 +49,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = { user, session, loading, signOut };
 
-  // CRITICAL FIX: Do not render children until the initial loading is false.
-  // This prevents the UI from rendering before it knows if a user is logged in.
+  // CRITICAL FIX: Show a full-page loader while the session is being verified.
+  // This prevents the app from rendering a protected route with a stale session.
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <AuthContext.Provider value={value}>
-      {loading ? null : children}
+      {children}
     </AuthContext.Provider>
   );
 };
