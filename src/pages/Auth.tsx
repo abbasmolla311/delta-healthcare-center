@@ -178,7 +178,7 @@ const Auth = () => {
                 <Input placeholder="Full Name" value={signupData.fullName} onChange={e => setSignupData({...signupData, fullName: e.target.value})} required/>
                 <Input type="email" placeholder="Email" value={signupData.email} onChange={e => setSignupData({...signupData, email: e.target.value})} required/>
                 <Input placeholder="Phone" value={signupData.phone} onChange={e => setSignupData({...signupData, phone: e.target.value})} required/>
-                <Input type="password" placeholder="Password" value={signupData.password} onChange={e => setSignupData({...signupData, password: e.g.et.value})} required/>
+                <Input type="password" placeholder="Password" value={signupData.password} onChange={e => setSignupData({...signupData, password: e.target.value})} required/>
                 <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Creating Account..." : "Sign Up"}</Button>
               </form>
             </TabsContent>
