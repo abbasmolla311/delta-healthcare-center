@@ -22,17 +22,6 @@ const Navbar = () => {
   const { itemCount } = useCart();
   const { isAdmin, isWholesale } = useUserRole();
 
-  const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Shop", path: "/shop" },
-    { name: "Doctors", path: "/doctors" },
-    { name: "Lab Tests", path: "/lab-tests" },
-    { name: "Scans", path: "/scan-booking" },
-    { name: "Contact", path: "/contact" },
-  ];
-
-  const isActive = (path: string) => location.pathname === path;
-
   const getDashboardLink = () => {
     if (isAdmin) return "/admin";
     if (isWholesale) return "/wholesale";
@@ -42,8 +31,27 @@ const Navbar = () => {
   const getDashboardLabel = () => {
     if (isAdmin) return "Admin Panel";
     if (isWholesale) return "Business Dashboard";
-    return "My Account";
+    return "Dashboard";
   };
+
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "Shop", path: "/shop" },
+    { name: "Doctors", path: "/doctors" },
+    { name: "Lab Tests", path: "/lab-tests" },
+    { name: "Scans", path: "/scan-booking" },
+    { name: "Contact", path: "/contact" },
+    ...(user && !isAdmin
+      ? [
+          {
+            name: isWholesale ? "Business Dashboard" : "Dashboard",
+            path: getDashboardLink(),
+          },
+        ]
+      : []),
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
@@ -58,6 +66,7 @@ const Navbar = () => {
               </div>
             </Link>
 
+            {/* Desktop Menu */}
             <div className="hidden lg:flex items-center gap-6">
               <button
                 className="flex items-center gap-2 px-4 py-2 bg-primary/5 text-primary rounded-lg font-medium text-sm hover:bg-primary/10 transition-colors"
@@ -67,6 +76,7 @@ const Navbar = () => {
                 Categories
                 <ChevronDown className="h-4 w-4" />
               </button>
+
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -80,22 +90,30 @@ const Navbar = () => {
               ))}
             </div>
 
+            {/* Desktop Right Side */}
             <div className="hidden md:flex items-center gap-1.5">
               <LanguageSwitcher />
+
               <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-5 w-5" />
               </Button>
+
               <Link to="/cart" className="relative">
                 <Button variant="ghost" size="icon">
                   <ShoppingCart className="h-5 w-5" />
                   {itemCount > 0 && (
-                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    >
                       {itemCount > 9 ? "9+" : itemCount}
                     </Badge>
                   )}
                 </Button>
               </Link>
+
               {user && <NotificationDropdown />}
+
               {user ? (
                 <Link to={getDashboardLink()}>
                   <Button variant="outline" size="sm" className="gap-2">

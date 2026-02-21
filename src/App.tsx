@@ -14,7 +14,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./layouts/AdminLayout";
-import UserDashboardLayout from "./layouts/UserDashboardLayout";
+import UserLayout from "./layouts/UserLayout"; // Import the new layout
 import Shop from "./pages/Shop";
 import Doctors from "./pages/Doctors";
 import LabTests from "./pages/LabTests";
@@ -39,18 +39,14 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminWholesale from "./pages/admin/AdminWholesale";
 import AdminAdvertisements from "./pages/admin/AdminAdvertisements";
 import AdminSettings from "./pages/admin/AdminSettings";
+import WholesaleDashboard from "./pages/wholesale/WholesaleDashboard";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const { loading } = useAuth();
-
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="fixed inset-0 flex items-center justify-center"><Loader2 className="h-10 w-10 animate-spin" /></div>;
   }
 
   return (
@@ -67,21 +63,23 @@ const AppRoutes = () => {
 
       {/* === Protected Routes === */}
       <Route element={<ProtectedRoute />}>
-        {/* User Dashboard Layout */}
-        <Route element={<UserDashboardLayout />}>
+
+        {/* User & Wholesale Dashboard Layout */}
+        <Route element={<UserLayout />}>
           <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/orders" element={<UserOrders />} />
-          <Route path="/prescriptions" element={<UserPrescriptions />} />
+          <Route path="/wholesale" element={<WholesaleDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<UserSettings />} />
+          <Route path="/orders" element={<UserOrders />} />
+          <Route path="/prescriptions" element={<UserPrescriptions />} />
         </Route>
 
-        {/* Other protected routes without the dashboard layout */}
+        {/* Other protected routes that don't use the sidebar layout */}
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/upload-prescription" element={<UploadPrescription />} />
 
-        {/* === Admin Routes === */}
+        {/* === Admin Routes (UNCHANGED) === */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrders />} />
