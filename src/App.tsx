@@ -1,8 +1,9 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { Loader2 } from "lucide-react";
@@ -56,6 +57,9 @@ import AdminWholesale from "./pages/admin/AdminWholesale";
 import AdminAdvertisements from "./pages/admin/AdminAdvertisements";
 import AdminSettings from "./pages/admin/AdminSettings";
 
+// Placeholder components for the fix
+const Placeholder = ({ title }: { title: string }) => <div className="p-4"><h2>{title}</h2><p>This page is under construction.</p></div>;
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -98,22 +102,28 @@ const AppRoutes = () => {
         <Route path="/wholesale/register" element={<WholesaleRegister />} />
 
         {/* USER PANEL */}
-        <Route element={<UserLayout />}>
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<UserSettings />} />
-          <Route path="/orders" element={<UserOrders />} />
-          <Route path="/prescriptions" element={<UserPrescriptions />} />
+        <Route path="/" element={<UserLayout />}>
+          <Route path="dashboard" element={<UserDashboard />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<UserSettings />} />
+          <Route path="orders" element={<UserOrders />} />
+          <Route path="prescriptions" element={<UserPrescriptions />} />
         </Route>
 
         {/* DOCTOR PANEL */}
-        <Route element={<DoctorLayout />}>
-          <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+        <Route path="/doctor" element={<DoctorLayout />}>
+          <Route index element={<Navigate to="/doctor/dashboard" replace />} />
+          <Route path="dashboard" element={<DoctorDashboard />} />
         </Route>
 
         {/* WHOLESALE PANEL */}
-        <Route element={<WholesaleLayout />}>
-          <Route path="/wholesale/dashboard" element={<WholesaleDashboard />} />
+        <Route path="/wholesale" element={<WholesaleLayout />}>
+          <Route index element={<Navigate to="/wholesale/dashboard" replace />} />
+          <Route path="dashboard" element={<WholesaleDashboard />} />
+          {/* ✅ THE FIX: ADDED MISSING WHOLESALE ROUTES */}
+          <Route path="products" element={<Placeholder title="Wholesale Products" />} />
+          <Route path="quotes" element={<Placeholder title="Quote Requests" />} />
+          <Route path="profile" element={<Placeholder title="Wholesale Profile" />} />
         </Route>
 
         {/* Cart */}

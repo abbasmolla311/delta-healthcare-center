@@ -1,52 +1,36 @@
 
-import { useState, useEffect } from "react";
-import { Link, Navigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate, Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Store, Building, FileText, MapPin, Phone, Mail, User, Shield, Package, ShoppingCart, Plus, Minus, Upload, Search, LogOut, TrendingUp, CreditCard, AlertCircle } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
-import { z } from "zod";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { AlertCircle } from "lucide-react";
 
-const businessSchema = z.object({ /* ... */ });
+// ✅ THE FIX: Importing the REAL page components we already built
+import WholesaleRegisterForm from "./WholesaleRegister";
+import WholesaleProducts from "./WholesaleProducts";
+import WholesaleQuotes from "./WholesaleQuotes";
+import WholesaleProfile from "./WholesaleProfile";
 
-const WholesaleRegisterComponent = ({ user, queryClient }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ /* ... */ });
-
-  const handleSubmit = async (e) => { /* ... */ };
-
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* Your full registration form JSX from WholesaleRegister.tsx */}
-    </div>
-  );
-};
-
-const DashboardContent = ({ user, profile }) => {
-  const { signOut } = useAuth();
-  // ... dashboard hooks and logic ...
-  return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Your full dashboard UI with header and tabs */}
-    </div>
-  );
-};
+// DashboardStats can be a simple component for the main dashboard view
+const DashboardStats = () => (
+    <Card>
+        <CardContent className="p-6">
+            <h2 className="text-xl font-semibold">Welcome to your Wholesale Dashboard</h2>
+            <p className="text-muted-foreground">From here you can browse products, manage quote requests, and view your business profile.</p>
+        </CardContent>
+    </Card>
+);
 
 const WholesaleDashboard = () => {
   const { user, loading: authLoading } = useAuth();
-  const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const activeTab = searchParams.get("tab") || "dashboard";
 
-  const { data: profile, isLoading: profileLoading, error } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["wholesale-profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -55,22 +39,37 @@ const WholesaleDashboard = () => {
       return data;
     },
     enabled: !!user,
-    retry: 1,
   });
 
   if (authLoading || profileLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading Wholesale Dashboard...</div>;
   }
 
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (error) {
-    return <div>Error loading profile.</div>;
+  // If no profile, render the full registration form component.
+  if (!profile) {
+    return <WholesaleRegisterForm />;
   }
 
-  return profile ? <DashboardContent user={user} profile={profile} /> : <WholesaleRegisterComponent user={user} queryClient={queryClient} />;
+  // This is the main view for a registered wholesale user.
+  return (
+    <div className="space-y-6">
+      {!profile.is_verified && (
+        <Card className="border-yellow-500 bg-yellow-50"><CardContent className="p-4 flex items-center gap-3"><AlertCircle className="h-5 w-5 text-yellow-600" /><div><p className="font-medium text-yellow-800">Verification Pending</p><p className="text-sm text-yellow-700">Your business profile is under review.</p></div></CardContent></Card>
+      )}
+
+      <Tabs value={activeTab} onValueChange={(tab) => navigate(`${location.pathname}?tab=${tab}`)} className="w-full">
+        {/* The TabsList is hidden because navigation is handled by the main Layout sidebar */}
+        <TabsContent value="dashboard"><DashboardStats /></TabsContent>
+        <TabsContent value="products"><WholesaleProducts /></TabsContent>
+        <TabsContent value="quotes"><WholesaleQuotes /></TabsContent>
+        <TabsContent value="profile"><WholesaleProfile /></TabsContent>
+      </Tabs>
+    </div>
+  );
 };
 
 export default WholesaleDashboard;

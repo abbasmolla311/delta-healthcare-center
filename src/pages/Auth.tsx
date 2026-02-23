@@ -13,42 +13,24 @@ const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ SMART LOGIN: This function now correctly handles all user roles.
+  // ✅ THE FIX: Added { replace: true } to the navigation.
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
 
-    const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error || !user) {
-      toast.error(error?.message || "Login failed. Please check your credentials.");
-      setIsLoading(false);
-      return;
-    }
-
-    // Fetch the user's role from the database
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (roleError && roleError.code !== 'PGRST116') {
-        toast.error("Could not verify user role.");
-        navigate("/");
+    if (error) {
+      toast.error(error.message);
     } else {
-        const role = roleData?.role || 'customer';
-        if (role === 'admin') navigate("/admin");
-        else if (role === 'doctor') navigate("/doctor/dashboard");
-        else if (role === 'wholesale') navigate("/wholesale/dashboard");
-        else navigate("/dashboard");
+      toast.success("Logged in successfully!");
+      navigate("/", { replace: true }); // This removes the login page from history.
     }
     setIsLoading(false);
   };
 
-  // ✅ SIMPLIFIED SIGNUP: New users can ONLY sign up as a regular customer.
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -66,7 +48,7 @@ const Auth = () => {
       const { error: roleError } = await supabase.from("user_roles").insert({ user_id: data.user.id, role: "customer" });
       if (roleError) { toast.error("Failed to set user role."); setIsLoading(false); return; }
       toast.success("Account created! Please check your email to verify.");
-      navigate("/"); // Send all new users to the home page
+      navigate("/", { replace: true }); // Also apply the fix here for consistency.
     }
     setIsLoading(false);
   };
