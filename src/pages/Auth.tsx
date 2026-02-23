@@ -13,24 +13,48 @@ const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // ✅ THE FIX: Added { replace: true } to the navigation.
+  // ✅ THE FIX: Re-implementing role-based redirection
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const email = e.currentTarget.email.value;
     const password = e.currentTarget.password.value;
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: { user }, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      toast.error(error.message);
+    if (error || !user) {
+      toast.error(error?.message || "Login failed. Please check your credentials.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Fetch the user's role from the database
+    const { data: roleData, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+
+    if (roleError && roleError.code !== 'PGRST116') { // PGRST116 means no rows found
+        toast.error("Could not verify user role. Logging in as customer.");
+        navigate("/", { replace: true });
     } else {
-      toast.success("Logged in successfully!");
-      navigate("/", { replace: true }); // This removes the login page from history.
+        const role = roleData?.role || 'customer'; // Default to customer
+        toast.success(`Logged in as ${role.charAt(0).toUpperCase() + role.slice(1)}`);
+        if (role === 'admin') {
+            navigate("/admin", { replace: true });
+        } else if (role === 'doctor') {
+            navigate("/doctor/dashboard", { replace: true });
+        } else if (role === 'wholesale') {
+            navigate("/wholesale/dashboard", { replace: true });
+        } else {
+            navigate("/dashboard", { replace: true });
+        }
     }
     setIsLoading(false);
   };
 
+  // Signup logic is correct, no changes needed
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -45,10 +69,9 @@ const Auth = () => {
     if (error) { toast.error(error.message); setIsLoading(false); return; }
 
     if (data.user) {
-      const { error: roleError } = await supabase.from("user_roles").insert({ user_id: data.user.id, role: "customer" });
-      if (roleError) { toast.error("Failed to set user role."); setIsLoading(false); return; }
+      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "customer" });
       toast.success("Account created! Please check your email to verify.");
-      navigate("/", { replace: true }); // Also apply the fix here for consistency.
+      navigate("/", { replace: true });
     }
     setIsLoading(false);
   };

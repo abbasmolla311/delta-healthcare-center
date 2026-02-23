@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query"; // ✅ Import useQueryClient
 
 interface AuthContextType {
   user: User | null;
@@ -16,15 +17,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient(); // ✅ Get the query client instance
 
-  // ✅ THE FIX: This is the correct, official pattern for Supabase auth.
   useEffect(() => {
-    // onAuthStateChange fires immediately with the initial session,
-    // so we don't need a separate getSession() call.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false); // Set loading to false only after we have the session info.
+      setLoading(false);
     });
 
     return () => {
@@ -32,8 +31,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // ✅ THE FIX: The signOut function now clears the react-query cache
   const signOut = async () => {
     await supabase.auth.signOut();
+    // This is the most important step: it removes all cached data.
+    queryClient.clear();
   };
 
   return (

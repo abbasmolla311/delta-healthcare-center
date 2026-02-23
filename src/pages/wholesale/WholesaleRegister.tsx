@@ -19,9 +19,14 @@ const WholesaleRegisterForm = () => {
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
 
-  // ✅ YOUR FIX: Using .upsert() with onConflict
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // ✅ THE FIX: Add a guard clause to ensure the user object is loaded.
+    if (!user) {
+      toast.error("User not loaded yet. Please wait a moment and try again.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from('wholesale_profiles').upsert(
@@ -43,6 +48,7 @@ const WholesaleRegisterForm = () => {
     }
   };
 
+  // ... (rest of the component is correct)
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader><CardTitle>Wholesale Registration</CardTitle><CardDescription>Register your business to access wholesale pricing.</CardDescription></CardHeader>
@@ -55,7 +61,7 @@ const WholesaleRegisterForm = () => {
             <div className="space-y-1"><Label htmlFor="gst_number">GST Number</Label><Input id="gst_number" value={formData.gst_number} onChange={handleChange} /></div>
           </div>
           <div className="space-y-1"><Label htmlFor="address">Full Address</Label><Textarea id="address" value={formData.address} onChange={handleChange} required/></div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>{isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Submitting...</> : "Submit for Verification"}</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting || !user}>{isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Submitting...</> : "Submit for Verification"}</Button>
         </form>
       </CardContent>
     </Card>
