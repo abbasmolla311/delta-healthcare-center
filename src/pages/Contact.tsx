@@ -14,7 +14,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    medicine: "",
+    service: "",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +28,7 @@ const Contact = () => {
     setIsSubmitting(true);
 
     // Create WhatsApp message
-    const whatsappMessage = `Hello! I'm ${formData.name}.\n\nMedicine/Query: ${formData.medicine}\n\nMessage: ${formData.message}\n\nContact: ${formData.phone}`;
+    const whatsappMessage = `Hello! I'm ${formData.name}.\n\nService/Query: ${formData.service}\n\nMessage: ${formData.message}\n\nContact: ${formData.phone}`;
     const encodedMessage = encodeURIComponent(whatsappMessage);
     
     // Open WhatsApp
@@ -40,7 +40,7 @@ const Contact = () => {
     });
 
     setIsSubmitting(false);
-    setFormData({ name: "", phone: "", medicine: "", message: "" });
+    setFormData({ name: "", phone: "", service: "", message: "" });
   };
 
   return (
@@ -55,7 +55,7 @@ const Contact = () => {
                 Contact <span className="text-gradient">Us</span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                Have a question about medicine availability? Need to order? 
+                Have a question about our diagnostic services or doctor availability?
                 We're here to help!
               </p>
             </div>
@@ -75,12 +75,6 @@ const Contact = () => {
                   <div className="space-y-1">
                     <a href="tel:+917427915869" className="text-sm text-muted-foreground hover:text-primary block">
                       +91 74279 15869
-                    </a>
-                    <a href="tel:+919836016644" className="text-sm text-muted-foreground hover:text-primary block">
-                      +91 98360 16644
-                    </a>
-                    <a href="tel:+917478686705" className="text-sm text-muted-foreground hover:text-primary block">
-                      +91 74786 86705
                     </a>
                   </div>
                 </CardContent>
@@ -136,13 +130,13 @@ const Contact = () => {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              {/* Medicine Inquiry Form */}
+              {/* Service Inquiry Form */}
               <div>
                 <Card className="shadow-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-secondary" />
-                      Medicine Inquiry / Order
+                      Service Inquiry / Appointment
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -173,12 +167,12 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="medicine">Medicine Name / Query *</Label>
+                        <Label htmlFor="service">Service / Query *</Label>
                         <Input
-                          id="medicine"
-                          name="medicine"
-                          placeholder="Enter medicine name or your query"
-                          value={formData.medicine}
+                          id="service"
+                          name="service"
+                          placeholder="Enter service name or your query"
+                          value={formData.service}
                           onChange={handleChange}
                           required
                         />
@@ -189,7 +183,7 @@ const Contact = () => {
                         <Textarea
                           id="message"
                           name="message"
-                          placeholder="Any additional information (quantity, urgency, etc.)"
+                          placeholder="Any additional information (date, urgency, etc.)"
                           value={formData.message}
                           onChange={handleChange}
                           rows={4}
@@ -221,7 +215,7 @@ const Contact = () => {
                       allowFullScreen
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
-                      title="Taj Medical Store Location"
+                      title="Delta HealthCare Location"
                       className="grayscale hover:grayscale-0 transition-all"
                     />
                   </CardContent>
@@ -234,12 +228,11 @@ const Contact = () => {
                         <MapPin className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">Store Address</h3>
+                        <h3 className="font-semibold text-lg mb-2">Center Address</h3>
                         <p className="text-muted-foreground">
-                          <strong>Taj Medical Store</strong><br />
+                          <strong>Delta HealthCare</strong><br />
                           Polerhat (Anantpur Mor),<br />
                           South 24 Parganas,<br />
-                          Kolkata - 135,<br />
                           West Bengal, India
                         </p>
                         <a
@@ -262,20 +255,16 @@ const Contact = () => {
                     <div className="space-y-4">
                       <a href="tel:+917427915869" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                         <Phone className="h-5 w-5" />
-                        <span>+91 74279 15869 (Doctor Inquiries)</span>
-                      </a>
-                      <a href="tel:+919836016644" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                        <Phone className="h-5 w-5" />
-                        <span>+91 98360 16644 (General)</span>
+                        <span>+91 74279 15869 (Appointment Inquiries)</span>
                       </a>
                       <a
-                        href="https://wa.me/917427915869?text=Hello, I want to check medicine availability"
+                        href="https://wa.me/917427915869?text=Hello, I want to inquiry about services"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                       >
                         <MessageCircle className="h-5 w-5" />
-                        <span>WhatsApp for Medicine Inquiry</span>
+                        <span>WhatsApp for Service Inquiry</span>
                       </a>
                     </div>
                   </CardContent>

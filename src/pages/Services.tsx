@@ -51,61 +51,60 @@ const Services = () => {
                 Our <span className="text-gradient">Services</span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                Complete healthcare solutions under one roof - from medicines to diagnostics, 
+                Complete healthcare solutions under one roof - from diagnostics to consultations,
                 we've got all your healthcare needs covered.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Medicine Supply */}
+        {/* Diagnostic Services */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                  <Pill className="h-4 w-4" />
-                  Medicine Supply
+                  <TestTube className="h-4 w-4" />
+                  Diagnostic Services
                 </div>
                 <h2 className="text-3xl font-bold">
-                  All Company Medicines at <span className="text-gradient">Best Prices</span>
+                  Advanced Diagnostics at <span className="text-gradient">Best Prices</span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  We stock medicines from all major pharmaceutical companies in India. 
-                  Whether you need a single strip or bulk quantities for wholesale, 
-                  Taj Medical Store is your trusted source.
+                  We offer a wide range of diagnostic services including blood tests, imaging, and more.
+                  Delta HealthCare is your trusted source for accurate and timely diagnostic reports.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-secondary/10">
                       <ShieldCheck className="h-5 w-5 text-secondary" />
                     </div>
-                    <span className="text-sm font-medium">100% Genuine</span>
+                    <span className="text-sm font-medium">Accurate Reports</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-secondary/10">
-                      <Truck className="h-5 w-5 text-secondary" />
+                      <Microscope className="h-5 w-5 text-secondary" />
                     </div>
-                    <span className="text-sm font-medium">Wholesale Supply</span>
+                    <span className="text-sm font-medium">Modern Equipment</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-secondary/10">
-                      <Package className="h-5 w-5 text-secondary" />
+                      <Stethoscope className="h-5 w-5 text-secondary" />
                     </div>
-                    <span className="text-sm font-medium">All Brands</span>
+                    <span className="text-sm font-medium">Expert Technicians</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-secondary/10">
                       <Clock className="h-5 w-5 text-secondary" />
                     </div>
-                    <span className="text-sm font-medium">Quick Delivery</span>
+                    <span className="text-sm font-medium">Quick Results</span>
                   </div>
                 </div>
               </div>
 
               <Card className="shadow-card">
                 <CardHeader>
-                  <CardTitle className="text-lg">Medicine Categories</CardTitle>
+                  <CardTitle className="text-lg">Medical Specialties</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -216,7 +215,7 @@ const Services = () => {
                   Expert Doctors <span className="text-gradient">At Your Doorstep</span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  15+ specialist doctors from top medical institutions visit Taj Medical Store regularly. 
+                  15+ specialist doctors from top medical institutions visit Delta HealthCare regularly.
                   Get expert consultations for:
                 </p>
                 <ul className="space-y-3 text-muted-foreground">
@@ -250,7 +249,7 @@ const Services = () => {
           </div>
         </section>
 
-        {/* Wholesale */}
+        {/* Pharmacy Services */}
         <section className="py-16 bg-muted/50">
           <div className="container mx-auto px-4">
             <Card className="max-w-4xl mx-auto overflow-hidden">
@@ -258,35 +257,35 @@ const Services = () => {
                 <div className="grid md:grid-cols-2">
                   <div className="p-8 space-y-4">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium">
-                      <Truck className="h-4 w-4" />
-                      Wholesale
+                      <Pill className="h-4 w-4" />
+                      Pharmacy
                     </div>
-                    <h3 className="text-2xl font-bold">Wholesale Medicine Supply</h3>
+                    <h3 className="text-2xl font-bold">In-house Pharmacy</h3>
                     <p className="text-muted-foreground">
-                      Special wholesale rates for pharmacies, clinics, and hospitals. 
-                      We supply medicines in bulk with competitive pricing.
+                      Get all your prescribed medicines at our in-house pharmacy.
+                      We stock medicines from all major pharmaceutical companies.
                     </p>
                     <ul className="space-y-2 text-sm text-muted-foreground">
                       <li>✓ All major pharmaceutical brands</li>
-                      <li>✓ Competitive wholesale pricing</li>
-                      <li>✓ Regular supply & delivery</li>
-                      <li>✓ Credit facilities available</li>
+                      <li>✓ Competitive pricing</li>
+                      <li>✓ Genuine medicines</li>
+                      <li>✓ Expert guidance</li>
                     </ul>
                     <a
-                      href="https://wa.me/917427915869?text=Hello, I want to inquire about wholesale medicine supply"
+                      href="https://wa.me/917427915869?text=Hello, I want to inquire about medicines"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <Button className="gap-2 mt-4">
-                        Inquire for Wholesale
+                        Inquire for Medicine
                       </Button>
                     </a>
                   </div>
                   <div className="gradient-medical p-8 flex items-center justify-center">
                     <div className="text-center text-primary-foreground">
                       <Package className="h-16 w-16 mx-auto mb-4 opacity-80" />
-                      <h4 className="text-xl font-bold">Bulk Orders Welcome</h4>
-                      <p className="text-sm opacity-80 mt-2">Contact us for special rates</p>
+                      <h4 className="text-xl font-bold">Complete Care</h4>
+                      <p className="text-sm opacity-80 mt-2">All your health needs covered</p>
                     </div>
                   </div>
                 </div>

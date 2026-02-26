@@ -1,101 +1,104 @@
 
-import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+
+// ✅ THE FIX: Using a valid UUID string that matches the database
+const SETTINGS_ID = "00000000-0000-0000-0000-000000000001";
 
 const AdminSettings = () => {
   const queryClient = useQueryClient();
 
-  // Fetch settings from the database
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("admin_settings").select("*").single();
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 means no rows found, which is fine on first load
-      return data || {};
+      const { data, error } = await supabase.from("admin_settings").select("*").eq("id", SETTINGS_ID).single();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
     },
   });
 
-  // State to manage local form changes
-  const [localSettings, setLocalSettings] = useState(null);
+  const [localSettings, setLocalSettings] = useState<any>(null);
 
-  // Update local state when settings are fetched
-  useState(() => {
+  useEffect(() => {
     if (settings) {
       setLocalSettings(settings);
     }
   }, [settings]);
 
-  // Mutation to update settings
-  const { mutate: updateSettings, isLoading: isSaving } = useMutation({
-    mutationFn: async (newSettings) => {
-      // Use upsert with a fixed ID (e.g., 1) for the single settings row
-      const { error } = await supabase.from("admin_settings").upsert({ id: 1, ...newSettings });
+  const { mutate: updateSettings, isPending: isSaving } = useMutation({
+    mutationFn: async (newSettings: any) => {
+      const { error } = await supabase.from("admin_settings").upsert({ ...newSettings, id: SETTINGS_ID });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Settings saved successfully!");
-      queryClient.invalidateQueries(["admin-settings"]);
+      queryClient.invalidateQueries({ queryKey: ["admin-settings"] });
     },
     onError: (error) => {
-      toast.error(`Error saving settings: ${error.message}`);
+      toast.error("Error saving settings", { description: error.message });
     },
   });
 
   const handleSave = () => {
-    updateSettings(localSettings);
+    if (localSettings) {
+      updateSettings(localSettings);
+    }
   };
 
-  if (isLoading || !localSettings) return <div>Loading settings...</div>;
+  const handleInputChange = (key: string, value: any) => {
+    setLocalSettings((prev: any) => ({ ...prev, [key]: value }));
+  };
 
-  const handleInputChange = (key, value) => {
-    setLocalSettings(prev => ({ ...prev, [key]: value }));
+  if (isLoading || !localSettings) {
+    return <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your store settings, integrations, and preferences.</p>
+        <h1 className="text-2xl font-bold">Admin Settings</h1>
+        <p className="text-muted-foreground">Manage your application-wide settings.</p>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Basic information about your store.</CardDescription></CardHeader>
+        <CardHeader><CardTitle>Store Information</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Store Name</Label>
-            <Input value={localSettings.store_name || ""} onChange={e => handleInputChange("store_name", e.target.value)} />
+            <Label htmlFor="store_name">Store Name</Label>
+            <Input id="store_name" value={localSettings.store_name || ""} onChange={(e) => handleInputChange("store_name", e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Support Email</Label>
-            <Input type="email" value={localSettings.support_email || ""} onChange={e => handleInputChange("support_email", e.target.value)} />
+            <Label htmlFor="support_email">Support Email</Label>
+            <Input id="support_email" type="email" value={localSettings.support_email || ""} onChange={(e) => handleInputChange("support_email", e.target.value)} />
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Payment Gateway</CardTitle><CardDescription>Connect your Razorpay account.</CardDescription></CardHeader>
+        <CardHeader><CardTitle>Payment Gateway (Stripe)</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-           <div className="space-y-2">
-            <Label>Razorpay Key ID</Label>
-            <Input placeholder="rzp_live_..." value={localSettings.razorpay_key_id || ""} onChange={e => handleInputChange("razorpay_key_id", e.target.value)}/>
+          <div className="space-y-2">
+            <Label htmlFor="stripe_pk">Stripe Publishable Key</Label>
+            <Input id="stripe_pk" placeholder="pk_test_..." value={localSettings.stripe_pk || ""} onChange={(e) => handleInputChange("stripe_pk", e.target.value)}/>
           </div>
           <div className="space-y-2">
-            <Label>Razorpay Key Secret</Label>
-            <Input type="password" placeholder="••••••••••••••••" value={localSettings.razorpay_key_secret || ""} onChange={e => handleInputChange("razorpay_key_secret", e.target.value)}/>
+            <Label htmlFor="stripe_sk">Stripe Secret Key</Label>
+            <Input id="stripe_sk" type="password" placeholder="••••••••••••••••" value={localSettings.stripe_sk || ""} onChange={(e) => handleInputChange("stripe_sk", e.target.value)}/>
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save All Settings"}</Button>
+      <div className="flex justify-end pt-4">
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Settings"}
+        </Button>
       </div>
     </div>
   );

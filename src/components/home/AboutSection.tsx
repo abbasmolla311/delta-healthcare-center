@@ -23,12 +23,12 @@ const AboutSection = () => {
           <div className="relative">
             <img
               src={storeFront}
-              alt="Taj Medical Store"
+              alt="Delta HealthCare"
               className="w-full h-[300px] md:h-[400px] object-cover rounded-2xl shadow-lg"
             />
             <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg">
-              <h3 className="font-bold text-lg mb-1">Taj Medical Store</h3>
-              <p className="text-sm text-muted-foreground">Your trusted healthcare partner since 2014</p>
+              <h3 className="font-bold text-lg mb-1">Delta HealthCare</h3>
+              <p className="text-sm text-muted-foreground">Diagnostic Polyclinic</p>
             </div>
           </div>
 
@@ -36,13 +36,12 @@ const AboutSection = () => {
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                About <span className="text-gradient">Taj Medical Store</span>
+                About <span className="text-gradient">Delta HealthCare</span>
               </h2>
               <p className="text-muted-foreground">
                 We are a leading healthcare destination offering comprehensive medical services including 
-                medicines from all major pharmaceutical companies, expert doctor consultations, 
-                diagnostic lab tests, and imaging services. Our commitment to quality healthcare 
-                has made us a trusted name in the community.
+                expert doctor consultations, diagnostic lab tests, and imaging services. Our commitment to
+                quality healthcare and accurate diagnostics has made us a trusted name in the community.
               </p>
             </div>
 
@@ -88,7 +87,7 @@ const AboutSection = () => {
                 </Button>
               </Link>
               <a
-                href="https://wa.me/917427915869?text=Hello, I want to inquire about medicines"
+                href="https://wa.me/917427915869?text=Hello, I want to inquire about services"
                 target="_blank"
                 rel="noopener noreferrer"
               >

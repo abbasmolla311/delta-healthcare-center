@@ -1,13 +1,13 @@
 
 import { useState } from "react";
-import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Package, Users, Stethoscope, TestTube,
   Scan, ShoppingCart, Settings, LogOut, Menu,
-  Bell, Search, Megaphone, Store, X
+  Bell, Search, Megaphone, Store, ChevronLeft
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,8 +38,8 @@ const SidebarContent = ({ isAdmin, onLinkClick }: { isAdmin: boolean, onLinkClic
         <Link to="/admin" className="flex items-center gap-3" onClick={onLinkClick}>
           <img src={logo} alt="Taj Medical" className="h-10 w-10 rounded-full object-cover" />
           <div>
-            <h1 className="font-bold text-primary">Taj Medical</h1>
-            <p className="text-xs text-muted-foreground">Admin Panel</p>
+            <h1 className="font-bold text-primary text-sm">Taj Medical</h1>
+            <p className="text-[10px] text-muted-foreground">Admin Panel</p>
           </div>
         </Link>
       </div>
@@ -86,6 +86,8 @@ const AdminLayout = () => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (authLoading || roleLoading) {
     return (
@@ -96,6 +98,8 @@ const AdminLayout = () => {
   }
 
   if (!user || !isAdmin) return <Navigate to="/auth" replace />;
+
+  const canGoBack = location.pathname !== "/admin";
 
   return (
     <div className="min-h-screen bg-muted/40">
@@ -114,7 +118,12 @@ const AdminLayout = () => {
 
       <div className="md:ml-64">
         <header className="sticky top-0 z-30 bg-card border-b px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {canGoBack && (
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={() => navigate(-1)}>
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileSidebarOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
@@ -130,7 +139,7 @@ const AdminLayout = () => {
             </Button>
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-bold">
                   {user.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

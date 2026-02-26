@@ -6,48 +6,39 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 const slides = [
   {
     id: 1,
-    title: "Up to 50% OFF on Medicines",
-    subtitle: "Order medicines online with fast delivery",
-    cta: "Shop Now",
-    link: "/shop",
+    title: "Advanced Diagnostic Services",
+    subtitle: "Accurate results with modern technology",
+    cta: "Book a Test",
+    link: "/lab-tests",
     bgColor: "from-primary to-primary/80",
-    image: "💊",
+    image: "🔬",
   },
   {
     id: 2,
-    title: "Book Lab Tests at Home",
-    subtitle: "Free home collection • Reports in 6-24 hrs",
-    cta: "Book Now",
-    link: "/lab-tests",
+    title: "Expert Doctor Consultations",
+    subtitle: "Consult with specialist doctors in your area",
+    cta: "View Doctors",
+    link: "/doctors",
     bgColor: "from-secondary to-secondary/80",
-    image: "🧪",
-  },
-  {
-    id: 3,
-    title: "Consult Top Doctors",
-    subtitle: "Video, Audio & Chat consultations available",
-    cta: "Consult Now",
-    link: "/consult",
-    bgColor: "from-purple-600 to-purple-500",
     image: "👨‍⚕️",
   },
   {
-    id: 4,
-    title: "Health Checkup Packages",
-    subtitle: "Comprehensive health packages starting ₹999",
+    id: 3,
+    title: "Complete Health Checkups",
+    subtitle: "Comprehensive health packages for your family",
     cta: "View Packages",
     link: "/lab-tests",
-    bgColor: "from-orange-500 to-orange-400",
+    bgColor: "from-purple-600 to-purple-500",
     image: "🏥",
   },
   {
-    id: 5,
-    title: "Upload Prescription",
-    subtitle: "Get medicines delivered to your doorstep",
-    cta: "Upload Now",
-    link: "/upload-prescription",
+    id: 4,
+    title: "Quality Pharmacy Services",
+    subtitle: "Genuine medicines from top brands available",
+    cta: "Order Now",
+    link: "/shop",
     bgColor: "from-teal-600 to-teal-500",
-    image: "📋",
+    image: "💊",
   },
 ];
 
@@ -79,12 +70,14 @@ const HeroCarousel = () => {
               <div className="space-y-4 text-white max-w-md">
                 <h2 className="text-2xl md:text-4xl font-bold">{slide.title}</h2>
                 <p className="text-white/90 text-sm md:text-base">{slide.subtitle}</p>
-                <Link to={slide.link}>
-                  <Button className="bg-white text-foreground hover:bg-white/90 gap-2">
-                    {slide.cta}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <div className="flex gap-4">
+                  <Link to={slide.link}>
+                    <Button className="bg-white text-foreground hover:bg-white/90 gap-2">
+                      {slide.cta}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
               <div className="hidden md:block text-8xl">{slide.image}</div>
             </div>

@@ -1,9 +1,9 @@
 
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Building, Package, FileText, User, LogOut, PanelLeft } from "lucide-react";
+import { Building, Package, FileText, User, LogOut, PanelLeft, ChevronLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ const wholesaleNavLinks = [
 const WholesaleLayout = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const activeTab = searchParams.get('tab') || 'dashboard';
 
@@ -44,6 +45,8 @@ const WholesaleLayout = () => {
     </nav>
   );
 
+  const canGoBack = location.pathname !== "/wholesale/dashboard" || activeTab !== "dashboard";
+
   return (
     <div className="min-h-screen w-full bg-muted/40">
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-10 w-64 flex-col border-r bg-card">
@@ -58,23 +61,29 @@ const WholesaleLayout = () => {
           </div>
         </div>
         <NavLinks />
-        <div className="p-4 mt-auto border-t"><Button variant="ghost" className="w-full justify-start" onClick={signOut}><LogOut className="mr-2 h-4 w-4"/>Logout</Button></div>
+        <div className="p-4 mt-auto border-t"><Button variant="ghost" className="w-full justify-start gap-3" onClick={signOut}><LogOut className="h-4 w-4"/>Logout</Button></div>
       </aside>
 
       <div className="flex flex-col md:ml-64">
         <header className="md:hidden sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card px-4">
-          <Sheet>
-            <SheetTrigger asChild><Button size="icon" variant="outline" className="sm:hidden"><PanelLeft /></Button></SheetTrigger>
-            {/* ✅ THE FIX: Adding flex-grow and the logout button to the mobile sheet */}
-            <SheetContent side="left" className="sm:max-w-xs flex flex-col">
-              <div className="flex-grow">
-                <NavLinks isMobile />
-              </div>
-              <div className="p-4 border-t">
-                <Button variant="ghost" className="w-full justify-start gap-3" onClick={signOut}><LogOut className="h-4 w-4" />Logout</Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            {canGoBack && (
+              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <Sheet>
+              <SheetTrigger asChild><Button size="icon" variant="outline"><PanelLeft className="h-5 w-5" /></Button></SheetTrigger>
+              <SheetContent side="left" className="sm:max-w-xs flex flex-col">
+                <div className="flex-grow">
+                  <NavLinks isMobile />
+                </div>
+                <div className="p-4 border-t">
+                  <Button variant="ghost" className="w-full justify-start gap-3 text-destructive" onClick={signOut}><LogOut className="h-4 w-4" />Logout</Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
           <h2 className="font-bold text-lg">{wholesaleNavLinks.find(l => l.tab === activeTab)?.name || "Menu"}</h2>
         </header>
         <main className="flex-1 p-4 sm:p-6"><Outlet /></main>

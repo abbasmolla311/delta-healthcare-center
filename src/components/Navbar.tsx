@@ -59,10 +59,10 @@ const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             <Link to="/" className="flex items-center gap-3">
-              <img src={logo} alt="Taj Medical Store" className="h-14 w-14 rounded-full object-cover" />
+              <img src={logo} alt="Delta HealthCare" className="h-14 w-14 rounded-full object-cover" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-primary">Taj Medical Store</h1>
-                <p className="text-xs text-muted-foreground">Wholesale & Retail</p>
+                <h1 className="text-lg font-bold text-primary">Delta HealthCare</h1>
+                <p className="text-xs text-muted-foreground">Diagnostic & Polyclinic</p>
               </div>
             </Link>
 

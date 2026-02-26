@@ -18,8 +18,8 @@ const HeroSection = () => {
           {/* Content */}
           <div className="space-y-8 animate-slide-up">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Pill className="h-4 w-4" />
-              Wholesale & Retail Medicine Store
+              <Stethoscope className="h-4 w-4" />
+              Diagnostic & Polyclinic
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
@@ -28,18 +28,18 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl">
-              Taj Medical Store - Your one-stop destination for all medicines from every major pharmaceutical company. We offer wholesale rates, expert doctor consultations, and complete diagnostic services.
+              Delta HealthCare - Your one-stop destination for complete diagnostic services and expert medical care. We offer expert doctor consultations, blood tests, imaging services, and more.
             </p>
 
             <div className="flex flex-wrap gap-4">
               <Link to="/contact">
                 <Button size="lg" className="gap-2 shadow-soft">
-                  Order Medicine
+                  Book Appointment
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
               <a
-                href="https://wa.me/917427915869?text=Hello, I want to check medicine availability"
+                href="https://wa.me/917427915869?text=Hello, I want to inquire about services"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -57,12 +57,12 @@ const HeroSection = () => {
                 <p className="text-sm text-muted-foreground">Expert Doctors</p>
               </div>
               <div>
-                <h3 className="text-3xl font-bold text-primary">100+</h3>
-                <p className="text-sm text-muted-foreground">Medicine Brands</p>
+                <h3 className="text-3xl font-bold text-primary">24/7</h3>
+                <p className="text-sm text-muted-foreground">Emergency Care</p>
               </div>
               <div>
                 <h3 className="text-3xl font-bold text-primary">10K+</h3>
-                <p className="text-sm text-muted-foreground">Happy Customers</p>
+                <p className="text-sm text-muted-foreground">Happy Patients</p>
               </div>
             </div>
           </div>
@@ -72,12 +72,12 @@ const HeroSection = () => {
             <div className="relative rounded-2xl overflow-hidden shadow-elevated">
               <img
                 src={storeFront}
-                alt="Taj Medical Store Front"
+                alt="Delta HealthCare Front"
                 className="w-full h-[400px] lg:h-[500px] object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
-                <h3 className="text-2xl font-bold text-background mb-2">Taj Medical Store</h3>
+                <h3 className="text-2xl font-bold text-background mb-2">Delta HealthCare</h3>
                 <p className="text-background/90">Polerhat, South 24 Parganas</p>
               </div>
             </div>
